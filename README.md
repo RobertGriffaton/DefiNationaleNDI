@@ -22,7 +22,6 @@ Le jeu propose une expérience immersive avec :
 - 📚 **Fiches pédagogiques** (wiki) pour contextualiser les enjeux
 - 🔊 **Ambiance sonore** avec effets de frappe clavier
 - 💾 **Système de sauvegarde** automatique
-- 🎮 **Easter egg** (code Konami)
 
 ## 🚀 Technologies Utilisées
 
