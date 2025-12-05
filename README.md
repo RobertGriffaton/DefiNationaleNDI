@@ -160,16 +160,18 @@ Les contributions sont les bienvenues ! N'hésitez pas à :
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
-## 👨‍💻 Auteur
+## 👨‍💻 Auteurs
 
 **Robert Griffaton**
 
 - GitHub: [@RobertGriffaton](https://github.com/RobertGriffaton)
 - Projet: [DefiNationaleNDI](https://github.com/RobertGriffaton/DefiNationaleNDI)
+
 **Stéphane Guenounou**
 
 - GitHub: [@Guen0x](https://github.com/Guen0x)
 - Projet: [DefiNationaleNDI](https://github.com/RobertGriffaton/DefiNationaleNDI)
+
 ## 🙏 Remerciements
 
 - Inspiré par les enjeux de souveraineté numérique dans l'éducation
