@@ -5,7 +5,9 @@
     Mini-jeu "Cookie Hell" : l'utilisateur doit décocher toutes les cases.
     
     MODIFICATION UX :
-    Une fois le jeu gagné, le bouton "CONTINUER" redirige vers la Boîte à Idées (login).
+    - Suppression du bouton piège "TOUT ACCEPTER".
+    - Il ne reste qu'un seul bouton (visuel) qui indique la progression.
+    - La victoire déclenche automatiquement le modal avec le bouton d'accès final.
 -->
 <html lang="fr">
 <head>
@@ -188,6 +190,7 @@
         /* Buttons */
         .buttons {
             display: flex;
+            justify-content: center; /* Centré car un seul bouton */
             gap: 15px;
             margin-top: 30px;
         }
@@ -200,6 +203,7 @@
             cursor: pointer;
             transition: all 0.3s;
             flex: 1;
+            max-width: 400px; /* Limite la largeur maintenant qu'il est seul */
             font-size: 1.1rem;
         }
 
@@ -214,11 +218,6 @@
             color: white;
             pointer-events: auto;
             animation: pulse 2s infinite;
-        }
-
-        .accept-all-btn {
-            background: linear-gradient(135deg, #ff9f43, #ffaf40);
-            color: black;
         }
 
         /* Modal */
@@ -303,13 +302,10 @@
             <!-- Généré par JavaScript -->
         </div>
 
-        <!-- Buttons -->
+        <!-- Buttons : Un seul bouton "Continuer" qui sert d'indicateur -->
         <div class="buttons">
             <button class="btn continue-btn" id="continueBtn" disabled>
                 🔒 CONTINUER (désactivé)
-            </button>
-            <button class="btn accept-all-btn" id="acceptAllBtn">
-                😈 TOUT ACCEPTER
             </button>
         </div>
 
@@ -358,7 +354,6 @@
         const progressText = document.getElementById('progressText');
         const progressFill = document.getElementById('progressFill');
         const continueBtn = document.getElementById('continueBtn');
-        const acceptAllBtn = document.getElementById('acceptAllBtn');
         const gameOverModal = document.getElementById('gameOverModal');
         const successModal = document.getElementById('successModal');
         const restartBtn = document.getElementById('restartBtn');
@@ -426,12 +421,10 @@
             startTimer();
             
             // Événements des boutons
-            acceptAllBtn.addEventListener('click', acceptAllCookies);
             restartBtn.addEventListener('click', restartGame);
             
             // --- MODIFICATION ICI : REDIRECTION ---
             victoryBtn.addEventListener('click', () => {
-                // Notifier le parent si nécessaire (pour d'autres usages)
                 try {
                     if (window.opener && !window.opener.closed) {
                         window.opener.postMessage({ type: 'cookie-hell-complete' }, '*');
@@ -577,26 +570,6 @@
             setTimeout(() => {
                 successModal.style.display = 'flex';
             }, 1000);
-        }
-
-        // Tout accepter (bouton piège)
-        function acceptAllCookies() {
-            if (!gameActive) return;
-            
-            const checkboxes = document.querySelectorAll('.cookie-item input[type="checkbox"]');
-            let rechecked = 0;
-            
-            checkboxes.forEach(checkbox => {
-                if (!checkbox.checked) {
-                    checkbox.checked = true;
-                    rechecked++;
-                }
-            });
-            
-            checkedCount = TOTAL_COOKIES;
-            updateProgress();
-            
-            alert(`😈 PIÈGE !\n\nVous venez de réactiver ${rechecked} option${rechecked > 1 ? 's' : ''}.\nContinuez à décocher !`);
         }
 
         // Redémarrer le jeu

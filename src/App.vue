@@ -286,14 +286,8 @@ onUnmounted(() => {
                 <div class="flex flex-col gap-2">
                     <!-- 1. Boîte à Outils (Pointe vers Cookie Hell) -->
                     <a href="/form_V4/cookie-hell-simple.html" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-lg transition-transform hover:scale-105 shadow-md flex items-center justify-end gap-2">
-                        <span>🛠️ Boîte à Outils</span>
+                        <span>🛠️ Boîte à idées</span>
                         <span class="text-xs opacity-75">(Cookies)</span>
-                    </a>
-                    
-                    <!-- 2. Formulaire (Pointe vers le form principal) -->
-                    <a href="/form_V4/index.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg transition-transform hover:scale-105 shadow-md flex items-center justify-end gap-2">
-                        <span>📝 Formulaire</span>
-                        <span class="text-xs opacity-75">(Main)</span>
                     </a>
                 </div>
             </div>
