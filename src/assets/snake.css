@@ -1,0 +1,186 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+
+/* On scope tout sous une classe spécifique pour ne pas casser le site principal */
+.snake-wrapper {
+    --term-bg: #0c0c0c;
+    --term-text: #00ff00;
+    --term-dim: #008f00;
+    --term-font: 'Fira Code', 'Courier New', monospace;
+    
+    background-color: rgba(0, 0, 0, 0.95);
+    color: var(--term-text);
+    font-family: var(--term-font);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999; /* Au dessus de tout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Terminal Window */
+.snake-wrapper .terminal-window {
+    width: 800px;
+    max-width: 95vw;
+    background-color: var(--term-bg);
+    border-radius: 6px;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+    border: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.snake-wrapper .close-overlay-btn {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: #ff5f56;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: sans-serif;
+}
+
+.snake-wrapper .terminal-header {
+    background: #1a1a1a;
+    padding: 8px 12px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.snake-wrapper .terminal-buttons {
+    display: flex;
+    gap: 6px;
+    margin-right: 12px;
+}
+
+.snake-wrapper .term-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.snake-wrapper .term-btn.close { background: #ff5f56; }
+.snake-wrapper .term-btn.min { background: #ffbd2e; }
+.snake-wrapper .term-btn.max { background: #27c93f; }
+
+.snake-wrapper .terminal-title {
+    color: #888;
+    font-size: 12px;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.snake-wrapper .terminal-body {
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Shell Prompt */
+.snake-wrapper .command-line {
+    margin-bottom: 8px;
+    display: flex;
+}
+
+.snake-wrapper .prompt {
+    color: var(--term-text);
+    margin-right: 8px;
+    font-weight: 700;
+}
+
+.snake-wrapper .command {
+    color: #fff;
+}
+
+.snake-wrapper .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: var(--term-text);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* Game Container Integration */
+.snake-game-container {
+    margin-top: 16px;
+    border: 2px solid var(--term-dim);
+    position: relative;
+    display: inline-block;
+}
+
+canvas.snake-canvas {
+    background-color: #000;
+    display: block;
+    cursor: none;
+}
+
+/* Overlay (TUI Style) */
+.snake-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.snake-overlay.hidden {
+    display: none;
+}
+
+.snake-message {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px var(--term-text);
+    color: var(--term-text);
+}
+
+.snake-btn {
+    background: transparent;
+    color: var(--term-text);
+    border: 2px solid var(--term-text);
+    padding: 8px 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+
+.snake-btn:hover {
+    background: var(--term-text);
+    color: #000;
+}
+
+/* Score in Terminal */
+.terminal-status-bar {
+    margin-top: 8px;
+    color: var(--term-dim);
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+}

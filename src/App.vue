@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import scenario from './assets/scenario.json';
+// Import du jeu Snake (Assure-toi d'avoir créé les fichiers snake.js et snake.css dans assets)
+import { SnakeGame } from './assets/snake.js';
+import './assets/snake.css';
 
 // --- ÉTAT DU JEU ---
 const currentStepId = ref(1);
@@ -10,7 +13,7 @@ const displayedText = ref("");
 const isTyping = ref(false); 
 const showWiki = ref(false); 
 
-// --- ÉTAT DU TERMINAL INTERACTIF ---
+// --- ÉTAT DU TERMINAL INTERACTIF (HACKER) ---
 const showTerminal = ref(false);
 const terminalInput = ref(""); 
 const terminalHistory = ref([]); 
@@ -19,14 +22,14 @@ const terminalCallback = ref(null);
 const terminalScript = ref([]); 
 const isProcessingCommand = ref(false); 
 
+// --- EASTER EGG SNAKE ---
+const showSnake = ref(false);
+const snakeGameInstance = ref(null);
+
 // --- AUDIO ---
 const typingAudio = new Audio('/sounds/typing.mp3');
 typingAudio.loop = true; 
 typingAudio.volume = 0.3;
-
-// --- CHEAT CODE (KONAMI) ---
-const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-let keyHistory = [];
 
 // --- DATA ---
 const currentStep = computed(() => {
@@ -50,9 +53,13 @@ const currentCharacter = computed(() => {
   return `/img/${charFile}`;
 });
 
-// --- 1. SAUVEGARDE & CHEAT ---
+// --- 1. SAUVEGARDE ---
 const saveGame = () => {
-    const gameState = { step: currentStepId.value, autonomy: autonomyScore.value, budget: budgetScore.value };
+    const gameState = { 
+        step: currentStepId.value, 
+        autonomy: autonomyScore.value, 
+        budget: budgetScore.value 
+    };
     localStorage.setItem('nird_save', JSON.stringify(gameState));
 };
 
@@ -68,14 +75,33 @@ const loadGame = () => {
     }
 };
 
-const checkCheatCode = (e) => {
-    keyHistory.push(e.key);
-    if (keyHistory.length > konamiCode.length) keyHistory.shift();
-    if (keyHistory.join('') === konamiCode.join('')) {
-        autonomyScore.value = 100; budgetScore.value = 100;
-        alert("💻 MODE GOD ACTIVÉ : Jauges remplies !");
-        keyHistory = [];
+// --- LOGIQUE SNAKE GAME ---
+const openSnakeGame = async () => {
+    showSnake.value = true;
+    await nextTick(); // Attendre que la DIV #hidden-snake-game soit créée dans le DOM
+    
+    if (!snakeGameInstance.value) {
+        // Création de l'instance si elle n'existe pas encore
+        snakeGameInstance.value = new SnakeGame('hidden-snake-game', {
+            canvasWidth: 600,
+            canvasHeight: 400,
+            speed: 100,
+            gridSize: 20
+        });
+    } else {
+        // Sinon on reset juste le jeu
+        snakeGameInstance.value.resetGame();
+        snakeGameInstance.value.draw(1);
     }
+};
+
+const closeSnakeGame = () => {
+    showSnake.value = false;
+    if (snakeGameInstance.value) {
+        snakeGameInstance.value.destroy(); // Arrêter la boucle de jeu
+        snakeGameInstance.value = null; 
+    }
+    window.focus(); // Redonner le focus au jeu principal
 };
 
 // --- 2. MOTEUR TEXTE ---
@@ -101,7 +127,7 @@ const typeText = async () => {
   saveGame();
 };
 
-// --- 3. TERMINAL INTERACTIF ---
+// --- 3. TERMINAL INTERACTIF (HACKER) ---
 const openTerminal = (scriptLines, nextAction) => {
     showTerminal.value = true;
     terminalHistory.value = [
@@ -114,16 +140,14 @@ const openTerminal = (scriptLines, nextAction) => {
     terminalCallback.value = nextAction; 
     isProcessingCommand.value = false;
     
-    // Focus hack pour mobile/accessibilité
     nextTick(() => { });
 };
 
 const handleTerminalKey = async (e) => {
-    checkCheatCode(e);
-
+    // Si le terminal n'est pas ouvert, on ne fait rien
     if (!showTerminal.value || isProcessingCommand.value) return;
 
-    // Gestion de l'espace (pour éviter le scroll page)
+    // Gestion Espace (Empêcher le scroll)
     if (e.key === ' ') {
         e.preventDefault(); 
         terminalInput.value += ' ';
@@ -133,9 +157,20 @@ const handleTerminalKey = async (e) => {
     // Validation (Entrée)
     if (e.key === 'Enter') {
         e.preventDefault();
-        if (terminalInput.value.trim() === "") return; 
+        const command = terminalInput.value.trim();
+        if (command === "") return; 
 
+        // Afficher la commande dans l'historique
         terminalHistory.value.push(`root@village-nird:~# ${terminalInput.value}`);
+        
+        // --- EASTER EGG : Lancement du Snake via commande ---
+        if (command === 'snake' || command === './hidden_snake.sh') {
+            terminalInput.value = "";
+            openSnakeGame();
+            return; // On arrête là pour ne pas lancer le script du jeu
+        }
+
+        // --- Comportement Normal (Script Fake) ---
         terminalInput.value = "";
         isProcessingCommand.value = true; 
 
@@ -164,7 +199,7 @@ const handleTerminalKey = async (e) => {
         return;
     }
 
-    // Saisie standard
+    // Saisie standard (1 caractère)
     if (e.key.length === 1) {
         terminalInput.value += e.key;
     }
@@ -211,6 +246,7 @@ watch(currentStepId, () => { typeText(); });
 onMounted(() => {
     loadGame();
     typeText();
+    // Écouteur global pour le terminal
     window.addEventListener('keydown', handleTerminalKey);
 });
 
@@ -228,7 +264,7 @@ onUnmounted(() => {
     <div class="absolute inset-0 bg-black/30 pointer-events-none"></div>
 
     <!-- HUD (Jauges) -->
-    <div class="absolute top-4 left-4 flex flex-col gap-3 z-40 bg-gray-900/90 p-4 rounded-lg backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-mono shadow-xl w-64 border-l-4 border-l-blue-500">
+    <div class="absolute top-4 left-4 flex flex-col gap-3 z-40 bg-gray-900/90 p-4 rounded-lg backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-mono shadow-xl w-64 border-l-4 border-l-blue-500 transition-all">
         <div class="flex flex-col gap-1">
             <div class="flex justify-between font-bold"><span>🛡️ Résistance</span><span>{{ autonomyScore }}%</span></div>
             <div class="w-full h-2 bg-gray-700 rounded-full overflow-hidden"><div class="h-full transition-all duration-500" :class="autonomyScore < 30 ? 'bg-red-500' : autonomyScore < 70 ? 'bg-yellow-400' : 'bg-green-500'" :style="{width: autonomyScore + '%'}"></div></div>
@@ -241,7 +277,7 @@ onUnmounted(() => {
 
     <!-- WIKI POPUP (Notification) -->
     <Transition name="slide-right">
-        <div v-if="showWiki && currentStep.wiki" class="absolute top-4 right-4 z-50 w-72 md:w-96">
+        <div v-if="showWiki && currentStep.wiki" class="absolute top-4 right-4 z-40 w-72 md:w-96">
             <div class="bg-gray-800/95 border-l-4 border-yellow-400 text-white p-5 rounded-r-lg shadow-2xl relative">
                 <button @click="showWiki = false" class="absolute top-2 right-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full w-6 h-6 flex items-center justify-center text-xs">✕</button>
                 <h3 class="text-sm font-bold text-yellow-400 mb-2 flex items-center gap-2 uppercase tracking-wide">💡 Le Saviez-vous ?</h3>
@@ -252,7 +288,7 @@ onUnmounted(() => {
         </div>
     </Transition>
 
-    <!-- TERMINAL INTERACTIF (Overlay) -->
+    <!-- TERMINAL INTERACTIF (Overlay installation) -->
     <Transition name="fade">
         <div v-if="showTerminal" class="absolute inset-0 z-[100] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4">
             <div class="w-full max-w-4xl bg-black border-2 border-gray-700 rounded-lg shadow-2xl font-mono text-sm md:text-lg overflow-hidden flex flex-col h-[70vh] relative">
@@ -282,6 +318,35 @@ onUnmounted(() => {
         </div>
     </Transition>
 
+    <!-- EASTER EGG: SNAKE GAME OVERLAY -->
+    <!-- C'est ici que le jeu se lance quand on tape "snake" dans le terminal -->
+    <div v-if="showSnake" class="snake-wrapper">
+        <div class="terminal-window">
+            <button @click="closeSnakeGame" class="close-overlay-btn">FERMER X</button>
+            <div class="terminal-header">
+                <div class="terminal-buttons">
+                    <div class="term-btn close"></div>
+                    <div class="term-btn min"></div>
+                    <div class="term-btn max"></div>
+                </div>
+                <div class="terminal-title">root@ndi-2025: ~/games/snake (EASTER EGG)</div>
+            </div>
+            <div class="terminal-body">
+                <div class="command-line">
+                    <span class="prompt">root@ndi-2025:~$</span>
+                    <span class="command">./hidden_snake.sh --fullscreen</span>
+                </div>
+                <!-- Container où le jeu va s'injecter -->
+                <div id="hidden-snake-game"></div>
+
+                <div class="terminal-status-bar">
+                    <span>PID: 1337</span>
+                    <span>Score: <span id="term-score">0</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- PERSONNAGE (Centré, Ajusté pour effet de profondeur) -->
     <div v-if="currentCharacter" class="absolute bottom-0 left-0 w-full flex justify-center items-end z-10 pointer-events-none">
         <img 
@@ -307,9 +372,15 @@ onUnmounted(() => {
                     >_ CMD
                 </span>
             </button>
-            <button v-if="!currentStep.choices || currentStep.choices.length === 0" @click="restartGame" class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg mx-auto animate-bounce mt-4">
-                🔄 Recommencer l'aventure
-            </button>
+            
+            <div v-if="!currentStep.choices || currentStep.choices.length === 0" class="flex flex-col items-center mt-4">
+                <button @click="restartGame" class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg animate-bounce">
+                    🔄 Recommencer l'aventure
+                </button>
+                <div class="mt-2 text-2xl opacity-20 hover:opacity-100 transition-opacity cursor-help" title="Essayez de taper 'snake' dans le terminal...">
+                    🐍
+                </div>
+            </div>
         </div>
 
         <!-- BOITE DE TEXTE -->
@@ -341,7 +412,6 @@ onUnmounted(() => {
 .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
 @keyframes shrink { from { width: 100%; } to { width: 0%; } }
 .animate-shrink { animation: shrink 15s linear forwards; }
-
 /* Scrollbar */
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
