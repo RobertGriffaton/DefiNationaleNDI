@@ -1,0 +1,255 @@
+[
+  {
+    "id": 1,
+    "text": "Alerte ! Fin de support Windows 10. Le parc est obsolète. Microsoft demande 50 000€ ou nos données sont en danger. Le Recteur attend ta décision.",
+    "speaker": "Le Proviseur",
+    "character": "proviseur_enerve.png",
+    "background": "bureau_directeur.jpg",
+    "wiki": {
+        "title": "🛑 Obsolescence Programmée",
+        "content": "Jeter des PC fonctionnels juste parce que le logiciel change est un désastre écologique. C'est le principal impact environnemental du numérique."
+    },
+    "choices": [
+      {
+        "text": "Payer les 50 000€ (La solution de facilité)",
+        "nextId": 2,
+        "impact": { "autonomy": -20, "budget": -60 }
+      },
+      {
+        "text": "Refuser et passer tout le lycée sous Linux ! (Radical)",
+        "nextId": 3,
+        "impact": { "autonomy": 30, "budget": 0 }
+      },
+      {
+        "text": "Ne rien faire et attendre... (Risqué)",
+        "nextId": 99,
+        "impact": { "autonomy": -10, "budget": 0 }
+      },
+      {
+        "text": "Lancer un audit du matériel existant (Prudent)",
+        "nextId": 3,
+        "impact": { "autonomy": 10, "budget": -5 },
+        "terminal": [
+            "root@admin:~# lshw -short",
+            "Scanning hardware...",
+            "H/W Path  Device    Class      Description",
+            "========================================",
+            "/0/100    vpc1      memory     8GiB System Memory",
+            "/0/1      cpu1      processor  Intel Core i5-6500",
+            "RESULT: Hardware is HEALTHY. No need to replace."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "text": "On a payé. On est ruinés. Plus de voyage scolaire. En plus, un commercial de 'GigaTech' nous offre des tablettes 'gratuites' contre les données des élèves.",
+    "speaker": "Le Proviseur",
+    "character": "proviseur_triste.png",
+    "background": "couloir_sombre.jpg",
+    "choices": [
+      {
+        "text": "Accepter les tablettes (C'est gratuit !)",
+        "nextId": 99,
+        "impact": { "autonomy": -50, "budget": 10 }
+      },
+      {
+        "text": "Refuser poliment.",
+        "nextId": 100,
+        "impact": { "autonomy": 0, "budget": 0 }
+      },
+      {
+        "text": "Les chasser et installer des logiciels libres en cachette !",
+        "nextId": 3,
+        "impact": { "autonomy": 20, "budget": 0 }
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "text": "La transition est lancée ! Mais Mme Michu hurle en salle des profs : 'L'imprimante ne marche plus avec votre système de pirate ! Je veux mon Windows !'",
+    "speaker": "Le Proviseur",
+    "character": "proviseur_enerve.png",
+    "background": "salle_profs_chaos.jpg",
+    "wiki": {
+        "title": "🤝 Inclusion Numérique",
+        "content": "Le plus dur n'est pas la technique, mais l'humain. Il faut accompagner le changement pour ne laisser personne de côté."
+    },
+    "choices": [
+      {
+        "text": "Acheter des imprimantes neuves (Gaspi)",
+        "nextId": 10,
+        "impact": { "autonomy": 5, "budget": -20 }
+      },
+      {
+        "text": "Lui dire de se débrouiller (Exclusion)",
+        "nextId": 4,
+        "impact": { "autonomy": 10, "budget": 0 }
+      },
+      {
+        "text": "Coder un driver avec le Club Info (Technique)",
+        "nextId": 5,
+        "impact": { "autonomy": 25, "budget": 0 },
+        "terminal": [
+            "root@lycee:~$ making driver...",
+            "Compiling cups-filter-v2.c",
+            "Linker error... fixing...",
+            "Success! Printer Canon_LBP is ready.",
+            "Test page printing..."
+        ]
+      },
+      {
+        "text": "Organiser une formation 'Café & Linux' (Pédagogie)",
+        "nextId": 5,
+        "impact": { "autonomy": 20, "budget": -5 }
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "text": "Les profs font grève ! 'Le numérique libre c'est trop compliqué'. Le rectorat menace de nous mettre sous tutelle.",
+    "speaker": "Le Proviseur",
+    "character": "proviseur_triste.png",
+    "background": "couloir_sombre.jpg",
+    "choices": [
+      {
+        "text": "Abandonner et revenir à Windows (Game Over)",
+        "nextId": 99,
+        "impact": { "autonomy": -30 }
+      },
+      {
+        "text": "S'excuser et former les profs en urgence.",
+        "nextId": 5,
+        "impact": { "autonomy": 5 }
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "text": "L'incendie est éteint. Les PC tournent sous Linux Mint. C'est rapide ! Mais où stocker les cours ? Les profs ont l'habitude de Google Drive...",
+    "speaker": "Léo (Élève Geek)",
+    "character": null,
+    "background": "atelier_geek.jpg",
+    "wiki": {
+        "title": "☁️ Cloud Souverain",
+        "content": "Nextcloud est une alternative libre qui permet de garder les données dans l'établissement, protégées des lois d'espionnage étrangères."
+    },
+    "choices": [
+      {
+        "text": "Google Drive (Facilité mais Dépendance)",
+        "nextId": 12,
+        "impact": { "autonomy": -10, "budget": 0 }
+      },
+      {
+        "text": "Clés USB pour tout le monde (Risque de virus)",
+        "nextId": 6,
+        "impact": { "autonomy": 10, "budget": -5 }
+      },
+      {
+        "text": "Installer un serveur Nextcloud local (Souverain)",
+        "nextId": 11,
+        "impact": { "autonomy": 30, "budget": -10 },
+        "terminal": [
+            "root@server:~$ docker run -d nextcloud",
+            "Initializing database mariadb...",
+            "Setting up admin user...",
+            "Enabling HTTPS (Let's Encrypt)...",
+            "Cloud is UP and RUNNING on local network."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "text": "Le Cloud local est en place ! On a aussi plein de vieux PC HS qui traînent à la cave. On en fait quoi ?",
+    "speaker": "Léo (Élève Geek)",
+    "character": null,
+    "background": "atelier_geek.jpg",
+    "choices": [
+      {
+        "text": "Déchetterie (Pollution)",
+        "nextId": 6,
+        "impact": { "autonomy": -10 }
+      },
+      {
+        "text": "Les donner à une asso (Solidarité)",
+        "nextId": 7,
+        "impact": { "autonomy": 10 }
+      },
+      {
+        "text": "Fabriquer une borne d'arcade ! (Upcycling)",
+        "nextId": 7,
+        "impact": { "autonomy": 25, "budget": 0 },
+        "terminal": [
+            "root@arcade:~$ install retropie",
+            "Configuring GPIO buttons...",
+            "Loading ROMs...",
+            "System Ready. Insert Coin."
+        ]
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "text": "L'académie a bloqué Google Drive pour non-respect du RGPD. On a perdu l'accès aux cours une semaine avant le Bac !",
+    "speaker": "Le Proviseur",
+    "character": "proviseur_enerve.png",
+    "background": "couloir_chaos.jpg",
+    "choices": [
+      {
+        "text": "C'est la fin... (Abandon)",
+        "nextId": 99,
+        "impact": { "autonomy": 0 }
+      },
+      {
+        "text": "Migrer en urgence vers un hébergeur français.",
+        "nextId": 100,
+        "impact": { "autonomy": 10 }
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "text": "L'année se termine. Le bilan est mitigé. On a fait des économies, mais l'esprit 'Village Résistant' n'est pas totalement là.",
+    "speaker": "Le Proviseur",
+    "character": "proviseur_normal.png",
+    "background": "ecole_neutre.jpg",
+    "choices": [
+      {
+        "text": "Terminer.",
+        "nextId": 100,
+        "impact": { "autonomy": 0 }
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "text": "VICTOIRE TOTALE ! Le lycée est un modèle. Élèves formés, données sécurisées, matériel réparé. Le Ministère nous donne le label 'Numérique Responsable' !",
+    "speaker": "Léo (Élève Geek)",
+    "character": null,
+    "background": "fete_village.jpg",
+    "choices": []
+  },
+  {
+    "id": 99,
+    "text": "GAME OVER. Obsolescence, dettes, dépendance. Big Tech a gagné.",
+    "speaker": "Système",
+    "character": null,
+    "background": "game_over.jpg",
+    "choices": []
+  },
+  {
+    "id": 100,
+    "text": "FIN NEUTRE. Vous avez survécu, mais sans briller. Réessayez pour faire mieux !",
+    "speaker": "Système",
+    "character": null,
+    "background": "salle_classe_mixte.jpg",
+    "choices": []
+  },
+  {
+      "id": 10,
+      "text": "Les nouvelles imprimantes espionnent le réseau. Mauvais choix.",
+      "speaker": "Système",
+      "choices": [{ "text": "Continuer...", "nextId": 5 }]
+  }
+]
