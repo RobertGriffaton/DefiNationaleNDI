@@ -1,123 +1,142 @@
-<!--
-  popup/button-simple.html
-  ------------------------
-  Petite page de test/option pour ouvrir directement le jeu de cookie-hell.
-  Peut servir comme fallback ou page de debug si la popup initiale est bloquée.
--->
-
 <!DOCTYPE html>
 <!--
   form_V4/popup/button-simple.html
   --------------------------------
-  Page de démonstration / modal "chiant" utilisée comme prototype.
-
-  Ce fichier contient un modal volontairement intrusif qui demande 3
-  clics sur "CONTINUER" pour rediriger vers une page (ici `nouvelle_page.html`).
-  Il est conservé comme démo ; le flux de production peut ouvrir directement
-  `cookie-hell-simple.html`.
+  Page intermédiaire "chiante" : l'utilisateur doit cliquer 3 fois sur "CONTINUER"
+  pour accéder au jeu des cookies.
+  
+  Le bouton "ANNULER" est un piège (ne fait rien ou affiche une alerte).
 -->
 <html lang="fr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Bouton simple</title>
+  <title>Attention requise</title>
   <style>
-    html, body { height: 100%; }
-    body { display: flex; align-items: center; justify-content: center; margin: 0; font-family: Arial, sans-serif; background:#f6f7fb; }
-    main { text-align: center; padding: 24px; }
-    .btn { background:#0078d4; color:#fff; padding:10px 16px; border:none; border-radius:6px; cursor:pointer }
-    button { text-align: center;}
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+    body { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: rgba(0,0,0,0.8);
+    }
     
-    /* Styles pour le popup modal "chiant" */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; }
-    .modal.active { display: flex; animation: shake 0.3s infinite; }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(10px); } }
-    @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-    
+    /* Styles pour le popup modal */
     .modal-content { 
       background: linear-gradient(135deg, #ff6b6b, #ffff00); 
       padding: 30px; 
-      border-radius: 8px; 
-      box-shadow: 0 0 50px rgba(255,0,0,0.8); 
+      border-radius: 15px; 
+      box-shadow: 0 0 50px rgba(255,0,0,0.5); 
       max-width: 400px; 
+      width: 90%;
       text-align: center; 
-      animation: bounce 0.5s infinite;
+      animation: bounce 0.5s infinite alternate;
       border: 5px solid #000;
+      position: relative;
     }
-    .modal-content h2 { margin-top: 0; color: #000; font-size: 28px; text-transform: uppercase; font-weight: bold; }
-    .modal-content p { color: #000; margin: 15px 0; font-size: 16px; font-weight: bold; }
+    
+    @keyframes bounce { 
+      0% { transform: scale(1); } 
+      100% { transform: scale(1.02); } 
+    }
+    
+    .modal-content h2 { 
+      margin-top: 0; 
+      color: #000; 
+      font-size: 28px; 
+      text-transform: uppercase; 
+      font-weight: 900; 
+      letter-spacing: 1px;
+    }
+    
+    .modal-content p { 
+      color: #000; 
+      margin: 15px 0; 
+      font-size: 18px; 
+      font-weight: bold; 
+    }
+    
     .modal-btn { 
       background: #000; 
       color: #ffff00; 
       padding: 12px 24px; 
       border: 3px solid #ffff00; 
-      border-radius: 6px; 
+      border-radius: 8px; 
       cursor: pointer; 
-      margin: 8px; 
+      margin: 10px 5px; 
       font-weight: bold;
-      font-size: 14px;
+      font-size: 16px;
+      text-transform: uppercase;
       transition: all 0.2s;
+      min-width: 120px;
     }
-    .modal-btn:hover { background: #ffff00; color: #000; }
-    .close-impossible { position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: #000; font-weight: bold; }
-    .close-impossible:hover { color: #fff; }
+    
+    .modal-btn:hover { 
+      background: #ffff00; 
+      color: #000; 
+      transform: scale(1.05);
+    }
+    
+    .modal-btn.cancel {
+      background: #ff4757;
+      color: white;
+      border-color: #ff6b81;
+    }
+    
+    .modal-btn.cancel:hover {
+      background: #ff6b81;
+    }
+
+    .close-impossible { 
+      position: absolute; 
+      top: 10px; 
+      right: 15px; 
+      font-size: 24px; 
+      cursor: pointer; 
+      color: #000; 
+      font-weight: bold; 
+      opacity: 0.5;
+    }
+    .close-impossible:hover { opacity: 1; }
   </style>
 </head>
 <body>
-  <main>
-    <h1>Bouton simple</h1>
-    <button id="simpleBtn" class="btn" aria-label="Cliquez pour un message">Cliquer</button>
-  </main>
 
-  <!-- Popup modal "chiant" -->
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <span class="close-impossible" onclick="return false;">✕</span>
-      <h2>⚠️ ATTENTION ⚠️</h2>
-      <p>C'EST TRÈS IMPORTANT !!!</p>
-      <p>Vous DEVEZ continuer pour envoyer votre formulaire !</p>
-      <button class="modal-btn" onclick="redirectToPage()">CONTINUER</button>
-      <button class="modal-btn" onclick="tryToClose()">ANNULER</button>
+  <div id="modal" class="modal-content">
+    <span class="close-impossible" onclick="return false;">✕</span>
+    <h2>⚠️ ATTENTION ⚠️</h2>
+    <p>C'EST TRÈS IMPORTANT !!!</p>
+    <p>Vous DEVEZ continuer pour envoyer votre formulaire !</p>
+    
+    <div style="margin-top: 20px;">
+        <button class="modal-btn" onclick="handleContinue()">CONTINUER</button>
+        <button class="modal-btn cancel" onclick="tryToClose()">ANNULER</button>
     </div>
   </div>
 
   <script>
-    // Fonctions pour gérer le popup "chiant"
     let continueClickCount = 0;
 
-    function openModal() {
-      document.getElementById('modal').classList.add('active');
-      continueClickCount = 0; // Réinitialise le compteur
-    }
-
-    function closeModal() {
-      document.getElementById('modal').classList.remove('active');
-    }
-
     function tryToClose() {
-      // Le bouton "Annuler" ne fait rien (c'est ça qui est chiant !)
-      alert('Ha ha ! Le bouton "Annuler" ne fonctionne pas ! 😈');
+      alert('Ha ha ! Le bouton "Annuler" ne fonctionne pas ! 😈\nVous devez continuer.');
     }
 
-    function redirectToPage() {
-      // Il faut cliquer 3 fois sur "Continuer" pour vraiment rediriger
+    function handleContinue() {
       continueClickCount++;
+      
       if (continueClickCount < 3) {
-        alert('Clic ' + continueClickCount + '/3 - Continuez à appuyer !');
+        alert(`Clic ${continueClickCount}/3 - Continuez à appuyer ! \n(C'est pour votre sécurité...)`);
       } else {
-        // Redirige vers nouvelle_page.html après 3 clics
-        window.location.href = 'nouvelle_page.html';
+        // Au 3ème clic, on redirige vers le jeu des cookies
+        // On remonte d'un niveau (../) pour atteindre la racine de form_V4
+        window.location.href = '../cookie-hell-simple.html';
       }
     }
 
-    // Ouvre le modal au clic du bouton
-    document.getElementById('simpleBtn').addEventListener('click', function () {
-      openModal();
-    });
-
-    // Empêche la fermeture accidentelle du popup avec Échap
+    // Empêche la fermeture avec Echap
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && document.getElementById('modal').classList.contains('active')) {
+      if (e.key === 'Escape') {
         e.preventDefault();
         alert('Non non non, pas d\'échappatoire ! 😈');
       }

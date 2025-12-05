@@ -1,9 +1,9 @@
 // ==================================================================
-// script.js — Comportements du formulaire V4
+// script.js — Comportements du formulaire V4 (Version Client-Side)
 // - gestion du déplacement du formulaire (effet "qui fuit")
 // - gestion du bouton "Arrêter le formulaire" et de la manivelle (batterie)
 // - interception de la première soumission : modal + mini-jeu (cookie-hell)
-// - restauration du message après complétion du jeu et persistance de l'état
+// - SIMULATION de l'envoi (pas de PHP)
 //
 // Contrat / inputs-outputs :
 // - Lit localStorage['lettres_user'] pour préremplir `user_email`, `user_nom`, `user_prenom`.
@@ -12,12 +12,6 @@
 //     * restaure le brouillon, autorise le collage, cache la manivelle,
 //     * marque localStorage['formV4_unlocked']='1' pour persistance (évite de refaire les mini-jeux),
 //     * désactive définitivement le bouton "Arrêter le formulaire".
-//
-// Points d'extension :
-// - user_check.php : endpoint qui permet au client de savoir si l'utilisateur est déjà connu
-// - save.php : endpoint serveur qui regroupe les messages par utilisateur dans content.json
-//
-// Remarques sécurité : ne pas stocker d'informations sensibles dans localStorage en production.
 // ==================================================================
 document.addEventListener('DOMContentLoaded', () => {
     // --- VARIABLES ---
@@ -38,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const batteryLevel = document.getElementById('battery-level');
     const statusText = document.getElementById('status-text');
 
-    // --- PARTIE 1 : LE FORMULAIRE QUI FUIT (Paramètres de ton fichier original) ---
+    // --- PARTIE 1 : LE FORMULAIRE QUI FUIT (Paramètres originaux) ---
 
     // Ajoute la transition CSS dynamiquement (Vitesse 0.6s = Plus lent/facile)
     form.style.transition = "left 0.6s ease-out, top 0.6s ease-out";
@@ -63,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     form.style.transform = "translate(-50%, -50%)";
 
     // Surveillance de la souris pour déclencher le déplacement aléatoire
-    // Le formulaire se déplacera si la souris s'approche du centre (distance < 150px)
     document.addEventListener("mousemove", (e) => {
         if (locked) return; // Si on a cliqué sur "Arrêter", on ne bouge plus
 
@@ -225,9 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     messageInput.addEventListener('paste', pasteHandler);
 
-    // ... tout le code du jeu précédent ...
-
-    // --- GESTION DU MESSAGE DE SUCCÈS (Retour de save.php) ---
+    // --- GESTION DU MESSAGE DE SUCCÈS (Simulation) ---
     const params = new URLSearchParams(window.location.search);
     if (params.get('saved') === '1') {
         const flash = document.getElementById('flash');
@@ -248,10 +239,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INTERCEPTION DE LA SOUMISSION : bloquer tant que le jeu n'est pas complété ---
     form.addEventListener('submit', (e) => {
+        // Empêcher l'envoi réel vers save.php car nous n'avons pas de serveur PHP ici
+        e.preventDefault();
+
         const hasMessage = messageInput && messageInput.value && messageInput.value.trim() !== '';
-        // Si le jeu n'est pas complété, on empêche toujours l'envoi
+        
+        // Si le jeu n'est pas complété, on lance la procédure de jeu
         if (!gameCompleted) {
-            e.preventDefault();
             try { localStorage.setItem('formV2_draft', messageInput.value); } catch (err) { /* ignore */ }
 
             // Si le jeu n'a pas encore été lancé, on lance la séquence (modal intégré ou popup)
@@ -288,10 +282,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     // ignore
                 }
             }
-
-            return; // empêcher l'envoi tant que jeu non complété
+            return; 
         }
-        // sinon, laisser la soumission se faire normalement (envoyer à save.php)
+        
+        // --- SIMULATION DE L'ENVOI (SI JEU COMPLÉTÉ) ---
+        // Au lieu d'envoyer à save.php, on simule une sauvegarde et on recharge la page
+        // Sauvegarde simulée dans localStorage pour "prouver" que ça marche
+        const submittedData = {
+            user: userEmailInput.value || 'anonyme',
+            message: messageInput.value,
+            date: new Date().toISOString()
+        };
+        // On pourrait stocker ça dans une liste de messages locaux
+        try {
+            const oldMessages = JSON.parse(localStorage.getItem('local_messages') || '[]');
+            oldMessages.push(submittedData);
+            localStorage.setItem('local_messages', JSON.stringify(oldMessages));
+        } catch(e) {}
+
+        // Redirection vers la même page avec ?saved=1 pour afficher le flash message
+        window.location.href = 'index.html?saved=1';
     });
 
     // Ecouter message postMessage depuis la popup / jeu
@@ -396,29 +406,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     userNameLabel.textContent = displayName;
                     userInfoBox.style.display = 'block';
                 }
-                // Vérifier côté serveur si l'utilisateur existe déjà pour éviter de lui faire refaire les mini-jeux
-                try {
-                    const params = new URLSearchParams();
-                    if (obj.email && obj.email.trim() !== '') {
-                        params.append('email', obj.email.trim());
-                    } else {
-                        params.append('nom', obj.nom || '');
-                        params.append('prenom', obj.prenom || '');
-                    }
-
-                    fetch('user_check.php?' + params.toString(), { cache: 'no-store' })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data && data.exists) {
-                                // L'utilisateur existe : autoriser l'usage normal sans mini-jeux
-                                try {
-                                    // marque persistante au cas où
-                                    try { localStorage.setItem('formV4_unlocked', '1'); } catch (e) {}
-                                    onGameComplete();
-                                } catch (e) { /* ignore */ }
-                            }
-                        }).catch(() => {/* ignore network errors */});
-                } catch (e) { /* ignore */ }
+                
+                // --- Suppression de la vérification PHP (user_check.php) ---
+                // Puisqu'on n'a pas de PHP, on suppose simplement que si l'utilisateur est connu localement
+                // et qu'il a déjà le flag 'unlocked', c'est bon.
             }
         }
     } catch (e) {
@@ -479,7 +470,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Au 3ème clic : ouvrir le jeu (popup avec fallback) et sauvegarder le brouillon
                 try { localStorage.setItem('formV2_draft', messageInput.value); } catch (err) { /* ignore */ }
 
-                const popupUrl = 'popup/index.html';
+                // --- URL CORRIGÉE POUR LE JEU ---
+                const popupUrl = 'cookie-hell-simple.html'; // Chemin relatif depuis form_V4/index.html
                 const features = 'width=520,height=700,menubar=no,toolbar=no,location=no';
                 try {
                     popupWindow = window.open(popupUrl, 'formV2CookiePopup', features);
