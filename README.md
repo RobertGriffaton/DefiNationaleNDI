@@ -108,8 +108,7 @@ Les jauges évoluent en temps réel avec des animations fluides et des codes cou
 - 🟡 Orange (30-60%)
 - 🔴 Rouge (<30%)
 
-### 4. Easter Eggs
-Un code Konami caché permet de remplir instantanément les jauges (mode développeur).
+
 
 ## 🎨 Thématiques Abordées
 
