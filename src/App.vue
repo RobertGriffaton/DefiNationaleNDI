@@ -275,9 +275,35 @@ onUnmounted(() => {
         </div>
     </div>
 
+    <!-- NAVBAR DE FIN DE JEU (En haut à droite) -->
+    <!-- Apparaît uniquement à la fin du jeu (pas de choix) -->
+    <Transition name="fade">
+        <div v-if="!currentStep.choices || currentStep.choices.length === 0" class="absolute top-4 right-4 z-50 flex flex-col gap-2 items-end">
+            <div class="bg-black/80 backdrop-blur-md border border-white/20 rounded-xl p-4 shadow-2xl text-right">
+                <h3 class="text-white font-bold uppercase tracking-widest text-xs mb-3 border-b border-white/10 pb-2">
+                    🚀 Continuer l'exploration NIRD
+                </h3>
+                <div class="flex flex-col gap-2">
+                    <!-- 1. Boîte à Outils (Pointe vers Cookie Hell) -->
+                    <a href="/form_V4/cookie-hell-simple.html" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-lg transition-transform hover:scale-105 shadow-md flex items-center justify-end gap-2">
+                        <span>🛠️ Boîte à Outils</span>
+                        <span class="text-xs opacity-75">(Cookies)</span>
+                    </a>
+                    
+                    <!-- 2. Formulaire (Pointe vers le form principal) -->
+                    <a href="/form_V4/index.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg transition-transform hover:scale-105 shadow-md flex items-center justify-end gap-2">
+                        <span>📝 Formulaire</span>
+                        <span class="text-xs opacity-75">(Main)</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </Transition>
+
     <!-- WIKI POPUP (Notification) -->
+    <!-- Déplacé légèrement (top-24) pour ne pas chevaucher la Navbar si elle est présente -->
     <Transition name="slide-right">
-        <div v-if="showWiki && currentStep.wiki" class="absolute top-4 right-4 z-40 w-72 md:w-96">
+        <div v-if="showWiki && currentStep.wiki" class="absolute top-24 right-4 z-40 w-72 md:w-96">
             <div class="bg-gray-800/95 border-l-4 border-yellow-400 text-white p-5 rounded-r-lg shadow-2xl relative">
                 <button @click="showWiki = false" class="absolute top-2 right-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full w-6 h-6 flex items-center justify-center text-xs">✕</button>
                 <h3 class="text-sm font-bold text-yellow-400 mb-2 flex items-center gap-2 uppercase tracking-wide">💡 Le Saviez-vous ?</h3>
@@ -361,6 +387,7 @@ onUnmounted(() => {
         
         <!-- CHOIX MULTIPLES (SCROLLABLE) -->
         <div v-if="!isTyping" class="mb-4 flex flex-col gap-2 w-full max-w-xl animate-fade-in max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+            <!-- Boucle des choix -->
             <button 
                 v-for="(choice, index) in currentStep.choices" 
                 :key="index" 
@@ -373,11 +400,15 @@ onUnmounted(() => {
                 </span>
             </button>
             
-            <div v-if="!currentStep.choices || currentStep.choices.length === 0" class="flex flex-col items-center mt-4">
-                <button @click="restartGame" class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg animate-bounce">
+            <!-- ÉCRAN DE FIN DE JEU : BOUTON RECOMMENCER (La navbar est maintenant en haut à droite) -->
+            <div v-if="!currentStep.choices || currentStep.choices.length === 0" class="flex flex-col items-center mt-4 w-full">
+                <!-- Bouton Recommencer -->
+                <button @click="restartGame" class="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg animate-bounce mb-6">
                     🔄 Recommencer l'aventure
                 </button>
-                <div class="mt-2 text-2xl opacity-20 hover:opacity-100 transition-opacity cursor-help" title="Essayez de taper 'snake' dans le terminal...">
+
+                <!-- Indice Snake (Easter Egg) -->
+                <div class="mt-4 text-2xl opacity-30 hover:opacity-100 transition-opacity cursor-help" title="Psst... Tapez 'snake' dans le terminal (choix technique)...">
                     🐍
                 </div>
             </div>
@@ -412,6 +443,7 @@ onUnmounted(() => {
 .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
 @keyframes shrink { from { width: 100%; } to { width: 0%; } }
 .animate-shrink { animation: shrink 15s linear forwards; }
+
 /* Scrollbar */
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }

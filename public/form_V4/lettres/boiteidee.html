@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--
+    form_V4/lettres/boiteidee.html
+    ------------------------------
+    Écran de saisie des informations utilisateur (email / nom / prénom).
+
+    Comportement:
+    - l'utilisateur saisit ses informations et clique sur "Accéder à la boîte à idées"
+    - le script associé sauvegarde un objet dans `localStorage['lettres_user']` puis
+        redirige vers la page ../index.html (formulaire principal)
+
+    Remarque: le stockage se fait côté client (localStorage) pour simplicité.
+    Option serveur: on peut remplacer par un POST vers un endpoint PHP si tu veux
+    persister côté serveur.
+-->
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Puzzled</title>
+
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="center-wrapper">
+            <div>
+                <h3>A vos idées !</h3>
+            </div>
+            <div class="login-wrapper">
+                <h1>Renseignez vos informations</h1>
+                <!-- Les champs sont éditables : l'utilisateur saisit son email / nom / prénom -->
+                <input type="email" name="email-box" id="email-box" placeholder="Email @">
+                <input type="text" name="nom-box" id="nom-box" placeholder="Nom">
+                <input type="text" name="prenom-box" id="prenom-box" placeholder="Prénom">
+                <!-- Le bouton sauvegarde dans localStorage puis redirige vers le formulaire -->
+                <button type="button" name="login-btn" id="login-btn">Accéder à la boîte à idées</button>
+            </div>
+        </div>
+        
+
+        <div id="catcher"></div>
+
+
+
+
+
+
+
+    </body>
+
+    <script src="script.js"></script>
+</html>
+

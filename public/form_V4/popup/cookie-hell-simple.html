@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<!--
+    form_V4/popup/cookie-hell-simple.html
+    ------------------------------------
+    Copie du mini-jeu Cookie Hell stockée dans le dossier popup (duplicate).
+    Voir `../cookie-hell-simple.html` (version principale).
+
+    Conserver pour historique / demo. En production, il vaut mieux garder
+    une seule source (racine) et débarrasser les duplications.
+-->
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookies de l'Enfer - Version Simple</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f0f0f0;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(30, 30, 46, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #ff4757;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #aaa;
+        }
+
+        /* Timer infernal */
+        .timer-infernal {
+            background: rgba(255, 71, 87, 0.1);
+            border: 2px solid #ff4757;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-infernal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 71, 87, 0.2) 50%, 
+                transparent 100%);
+            animation: scan 3s infinite linear;
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ff4757;
+            margin: 10px 0;
+            text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+        }
+
+        .timer-warning {
+            color: #ff6b81;
+            font-size: 1rem;
+        }
+
+        .timer-critical {
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Cookies container */
+        .cookies-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+
+        .cookie-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .cookie-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .cookie-checkbox {
+            margin-right: 15px;
+        }
+
+        .cookie-checkbox input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #ff4757;
+        }
+
+        .cookie-content {
+            flex: 1;
+        }
+
+        .cookie-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #f0f0f0;
+        }
+
+        .cookie-desc {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* Progress */
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ff3838);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Buttons */
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            font-size: 1.1rem;
+        }
+
+        .continue-btn {
+            background: #555;
+            color: #aaa;
+            pointer-events: none;
+        }
+
+        .continue-btn.enabled {
+            background: linear-gradient(135deg, #10ac84, #1dd1a1);
+            color: white;
+            pointer-events: auto;
+            animation: pulse 2s infinite;
+        }
+
+        .accept-all-btn {
+            background: linear-gradient(135deg, #ff9f43, #ffaf40);
+            color: black;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #ff4757;
+        }
+
+        .modal h2 {
+            color: #ff4757;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .modal p {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .modal-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍪 COOKIES DE L'ENFER</h1>
+            <p>Décochez TOUTES les cases avant que le temps ne s'écoule !</p>
+        </div>
+
+        <!-- Timer infernal -->
+        <div class="timer-infernal">
+            <div class="timer-warning" id="timerWarning">
+                ⏰ TEMPS RESTANT - Si le temps s'écoule, TOUT sera réactivé !
+            </div>
+            <div class="timer-display" id="timerDisplay">
+                02:00
+            </div>
+            <div class="timer-warning">
+                ⚠️ Vous devez décocher les 10 cases avant la fin du compte à rebours
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-container">
+            <div class="progress-text">
+                Cases désactivées : <span id="progressText">0</span>/10
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Cookies list -->
+        <div class="cookies-container" id="cookiesContainer">
+            <!-- Généré par JavaScript -->
+        </div>
+
+        <!-- Buttons -->
+        <div class="buttons">
+            <button class="btn continue-btn" id="continueBtn" disabled>
+                🔒 CONTINUER (désactivé)
+            </button>
+            <button class="btn accept-all-btn" id="acceptAllBtn">
+                😈 TOUT ACCEPTER
+            </button>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div class="modal" id="gameOverModal">
+            <div class="modal-content">
+                <h2>⏰ TEMPS ÉCOULÉ !</h2>
+                <p>Le compte à rebours est terminé.</p>
+                <p>Toutes les cases ont été <strong>réactivées automatiquement</strong>.</p>
+                <p>Vous devez recommencer depuis le début.</p>
+                <button class="modal-btn" id="restartBtn">
+                    🔄 RECOMMENCER
+                </button>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div class="modal" id="successModal">
+            <div class="modal-content">
+                <h2>🎉 VICTOIRE !</h2>
+                <p>Vous avez réussi à tout désactiver avant la fin du timer !</p>
+                <p>Temps restant : <span id="timeRemaining">00:00</span></p>
+                <p>Cases désactivées : 10/10</p>
+                <button class="modal-btn" id="victoryBtn">
+                    🏆 CONTINUER
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const TOTAL_COOKIES = 10;
+        const INITIAL_TIME = 120; // 2 minutes en secondes
+        
+        // État du jeu
+        let checkedCount = TOTAL_COOKIES;
+        let timeLeft = INITIAL_TIME;
+        let timerInterval = null;
+        let gameActive = true;
+
+        // Éléments DOM
+        const cookiesContainer = document.getElementById('cookiesContainer');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerWarning = document.getElementById('timerWarning');
+        const progressText = document.getElementById('progressText');
+        const progressFill = document.getElementById('progressFill');
+        const continueBtn = document.getElementById('continueBtn');
+        const acceptAllBtn = document.getElementById('acceptAllBtn');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const successModal = document.getElementById('successModal');
+        const restartBtn = document.getElementById('restartBtn');
+        const victoryBtn = document.getElementById('victoryBtn');
+        const timeRemaining = document.getElementById('timeRemaining');
+
+        // Données des cookies
+        const cookieData = [
+            "Cookies essentiels",
+            "Analytiques Google",
+            "Publicités ciblées",
+            "Réseaux sociaux",
+            "Sécurité avancée",
+            "Partenaires de données",
+            "Géolocalisation",
+            "Historique de navigation",
+            "Microphone",
+            "Caméra",
+            "Contacts",
+            "Messages",
+            "Historique d'achats",
+            "Données de santé",
+            "Reconnaissance faciale",
+            "Données génétiques",
+            "Préférences politiques",
+            "Données financières",
+            "Empreinte numérique",
+            "Synchronisation cross-appareils",
+            "Analyse vocale",
+            "Données de sommeil",
+            "Historique de recherche",
+            "Données météo",
+            "Analyse d'écriture",
+            "Données de conduite",
+            "Préférences alimentaires",
+            "Données de fitness",
+            "Historique de localisation",
+            "Analyse émotionnelle",
+            "Données de réseau",
+            "Historique de téléchargements",
+            "Données de calendrier",
+            "Analyse de photos",
+            "Consommation média",
+            "Historique d'appels",
+            "Données de jeu",
+            "Analyse de réseau social",
+            "Données d'accessibilité",
+            "Commandes vocales",
+            "Données de productivité",
+            "Analyse de frappe",
+            "Données de voyage",
+            "Navigation privée",
+            "Données de famille",
+            "Analyse de consommation",
+            "Données éducatives",
+            "Mises à jour",
+            "Données professionnelles",
+            "Analyse de personnalité"
+        ];
+
+        // Initialisation
+        function init() {
+            createCookieElements();
+            updateProgress();
+            startTimer();
+            
+            // Événements des boutons
+            acceptAllBtn.addEventListener('click', acceptAllCookies);
+            restartBtn.addEventListener('click', restartGame);
+            victoryBtn.addEventListener('click', () => {
+                try {
+                    if (window.opener && !window.opener.closed) {
+                        // Notify parent page that the game is complete
+                        window.opener.postMessage({ type: 'cookie-hell-complete' }, '*');
+                    }
+                } catch (e) { /* ignore */ }
+                // Close the popup after notifying
+                window.close();
+            });
+        }
+
+        // Créer les éléments cookie
+        function createCookieElements() {
+            cookiesContainer.innerHTML = '';
+            
+            for (let i = 0; i < TOTAL_COOKIES; i++) {
+                const cookieEl = document.createElement('div');
+                cookieEl.className = 'cookie-item';
+                
+                const cookieName = cookieData[i] || `Cookie #${i + 1}`;
+                
+                cookieEl.innerHTML = `
+                    <div class="cookie-checkbox">
+                        <input type="checkbox" id="cookie-${i}" checked>
+                    </div>
+                    <div class="cookie-content">
+                        <div class="cookie-title">${cookieName}</div>
+                        <div class="cookie-desc">Cette option permet de suivre votre activité pour améliorer votre expérience.</div>
+                    </div>
+                `;
+                
+                cookiesContainer.appendChild(cookieEl);
+                
+                // Événement sur la checkbox
+                const checkbox = cookieEl.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', function() {
+                    handleCookieChange(this);
+                });
+            }
+        }
+
+        // Gérer le changement d'une checkbox
+        function handleCookieChange(checkbox) {
+            if (!gameActive) return;
+            
+            if (checkbox.checked) {
+                checkedCount++;
+            } else {
+                checkedCount--;
+            }
+            
+            updateProgress();
+            
+            // Vérifier si tout est décoché
+            if (checkedCount === 0) {
+                winGame();
+            }
+        }
+
+        // Mettre à jour la progression
+        function updateProgress() {
+            const uncheckedCount = TOTAL_COOKIES - checkedCount;
+            progressText.textContent = uncheckedCount;
+            
+            const progress = (uncheckedCount / TOTAL_COOKIES) * 100;
+            progressFill.style.width = `${progress}%`;
+            
+            // Activer/désactiver le bouton Continuer
+            if (checkedCount === 0) {
+                continueBtn.disabled = false;
+                continueBtn.classList.add('enabled');
+                continueBtn.textContent = '✅ CONTINUER';
+            } else {
+                continueBtn.disabled = true;
+                continueBtn.classList.remove('enabled');
+                continueBtn.textContent = `🔒 CONTINUER (${checkedCount} restant${checkedCount > 1 ? 's' : ''})`;
+            }
+        }
+
+        // Démarrer le timer
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = INITIAL_TIME;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                // Avertissements
+                if (timeLeft === 60) {
+                    timerWarning.textContent = '⏰ 1 MINUTE RESTANTE ! Dépêchez-vous !';
+                    timerWarning.style.color = '#ffa502';
+                } else if (timeLeft === 30) {
+                    timerWarning.textContent = '🔥 30 SECONDES ! Ça va être chaud !';
+                    timerWarning.style.color = '#ff4757';
+                    timerDisplay.classList.add('timer-critical');
+                } else if (timeLeft <= 10) {
+                    timerWarning.textContent = `💀 ${timeLeft} SECONDES !!!`;
+                    timerWarning.style.color = '#ff0000';
+                }
+                
+                // Temps écoulé
+                if (timeLeft <= 0) {
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        // Mettre à jour l'affichage du timer
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Temps écoulé - tout réactiver
+        function timeUp() {
+            clearInterval(timerInterval);
+            gameActive = false;
+            
+            // Tout réactiver
+            const checkboxes = document.querySelectorAll('.cookie-item input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
+            checkedCount = TOTAL_COOKIES;
+            updateProgress();
+            
+            // Afficher le modal Game Over
+            setTimeout(() => {
+                gameOverModal.style.display = 'flex';
+            }, 500);
+        }
+
+        // Gagner le jeu
+        function winGame() {
+            clearInterval(timerInterval);
+            gameActive = false;
+            timeRemaining.textContent = timerDisplay.textContent;
+            
+            setTimeout(() => {
+                successModal.style.display = 'flex';
+            }, 1000);
+        }
+
+        // Tout accepter (bouton piège)
+        function acceptAllCookies() {
+            if (!gameActive) return;
+            
+            const checkboxes = document.querySelectorAll('.cookie-item input[type="checkbox"]');
+            let rechecked = 0;
+            
+            checkboxes.forEach(checkbox => {
+                if (!checkbox.checked) {
+                    checkbox.checked = true;
+                    rechecked++;
+                }
+            });
+            
+            checkedCount = TOTAL_COOKIES;
+            updateProgress();
+            
+            alert(`😈 PIÈGE !\n\nVous venez de réactiver ${rechecked} option${rechecked > 1 ? 's' : ''}.\nContinuez à décocher !`);
+        }
+
+        // Redémarrer le jeu
+        function restartGame() {
+            gameActive = true;
+            
+            // Fermer les modals
+            gameOverModal.style.display = 'none';
+            successModal.style.display = 'none';
+            
+            // Réinitialiser
+            checkedCount = TOTAL_COOKIES;
+            
+            const checkboxes = document.querySelectorAll('.cookie-item input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
+            updateProgress();
+            startTimer();
+            
+            // Réinitialiser les styles du timer
+            timerWarning.textContent = '⏰ TEMPS RESTANT - Si le temps s\'écoule, TOUT sera réactivé !';
+            timerWarning.style.color = '#ff6b81';
+            timerDisplay.classList.remove('timer-critical');
+        }
+
+        // Démarrer le jeu
+        window.onload = init;
+    </script>
+</body>
+</html>

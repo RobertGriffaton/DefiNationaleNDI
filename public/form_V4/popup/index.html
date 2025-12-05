@@ -1,0 +1,43 @@
+<!doctype html>
+<!--
+  form_V4/popup/index.html
+  ------------------------
+  Écran intermédiaire affiché dans la popup (lorsqu'on utilisait ce dossier).
+
+  Rôle : écran de préparation au jeu, propose un bouton "Lancer Cookie Hell" et
+  un lien de secours pour ouvrir le jeu dans un nouvel onglet si la popup est bloquée.
+
+  Note : ce fichier est optionnel si l'on ouvre directement `cookie-hell-simple.html`.
+-->
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Popup — Cookie Hell</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto;margin:0;background:#f6f7fb;display:flex;align-items:center;justify-content:center;height:100vh}
+    .box{background:#fff;padding:20px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.08);width:360px;text-align:center}
+    .btn{padding:10px 14px;border-radius:10px;border:none;background:#6366f1;color:#fff;font-weight:700;cursor:pointer}
+    .link{display:block;margin-top:12px;color:#374151}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h3>Préparer le jeu</h3>
+    <!-- Cette page est affichée dans la popup lancée depuis le formulaire.
+         Elle sert d'écran intermédiaire et redirige vers le jeu principal.
+         Le jeu notifiera ensuite la page parente lorsqu'il sera terminé. -->
+    <p>Le jeu <strong>Cookie Hell</strong> s'ouvrira pour un petit défi. Bonne chance !</p>
+    <button id="openGame" class="btn">Lancer Cookie Hell</button>
+    <p style="font-size:13px;color:#666;margin-top:10px">Si la popup est bloquée, cliquez ci-dessous pour ouvrir dans un nouvel onglet.</p>
+    <a class="link" id="openFallback" href="../cookie-hell-simple.html" target="_blank">Ouvrir le jeu dans un nouvel onglet</a>
+  </div>
+
+  <script>
+    document.getElementById('openGame').addEventListener('click', () => {
+      // Redirige la popup vers la page du jeu
+      window.location.href = '../cookie-hell-simple.html';
+    });
+  </script>
+</body>
+</html>

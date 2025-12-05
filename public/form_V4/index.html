@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<!--
+    form_V4/index.html
+    ------------------
+    Page principale du formulaire (UI client).
+
+    But : afficher le formulaire 'éco-responsable' et coordonner le jeu/flux UX.
+    Entrées attendues :
+        - lecture de `localStorage['lettres_user']` (email/nom/prénom) pour préremplir les champs
+        - interaction utilisateur (stop-btn, manivelle, envoi)
+    Sorties / effets :
+        - envoi POST vers `save.php` lors de la soumission validée
+        - déclenchement du mini-jeu (cookie-hell) via modal/popup pour la première soumission
+
+    Notes : documenter `script.js` pour la logique de jeu et `save.php` pour le stockage.
+-->
+<!--
+    form_V2/index.html
+    ------------------
+    Page principale du formulaire (version V2).
+    Comportement principal:
+    - Formulaire "qui fuit" : se déplace quand la souris s'approche.
+    - Bouton "Arrêter le formulaire" : capture le formulaire (le recentre) et active la section "manivelle".
+    - La manivelle simule une ressource (batterie) qui peut déclencher une panne si elle tombe à 0.
+    - Le champ message est protégé contre le collage jusqu'à ce que l'utilisateur réussisse le mini-jeu "cookie-hell" (ou effectue la procédure associée via popup).
+    - La soumission du formulaire est normalement envoyée à save.php, mais la première soumission (avec message non vide) ouvre une popup menant au mini-jeu.
+-->
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+    /* Styles du modal "popup chiant" intégré (fond rouge/alerte) */
+    .annoy-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; }
+    .annoy-modal.active { display: flex; animation: shake 0.3s infinite; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(10px); } }
+    @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .annoy-content { background: linear-gradient(135deg, #ff6b6b, #ffff00); padding: 30px; border-radius: 8px; box-shadow: 0 0 50px rgba(255,0,0,0.8); max-width: 420px; text-align: center; animation: bounce 0.5s infinite; border: 5px solid #000; }
+    .annoy-content h2 { margin-top: 0; color: #000; font-size: 24px; text-transform: uppercase; font-weight: bold; }
+    .annoy-content p { color: #000; margin: 10px 0; font-size: 14px; font-weight: bold; }
+    .annoy-btn { background: #000; color: #ffff00; padding: 10px 18px; border: 3px solid #ffff00; border-radius: 6px; cursor: pointer; margin: 8px; font-weight: bold; }
+    .annoy-btn:hover { background: #ffff00; color: #000; }
+    .annoy-close { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #000; font-weight: bold; }
+    </style>
+    <title>Formulaire NIRD - Défi Manivelle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="flash" class="flash" role="status" aria-live="polite" hidden>Votre message a bien été reçu</div>
+
+<form id="contactForm" action="save.php" method="POST">
+    <h2>Formulaire Éco-Responsable</h2>
+    <!-- Informations utilisateur transmises depuis la page 'lettres/boiteidee.html' -->
+    <div id="user-info" style="display:none; margin-bottom:8px; font-size:14px; color:#333;">
+        Connecté en tant que <strong id="user-name"></strong>
+    </div>
+
+    <!-- Champs cachés pour transmettre les infos utilisateur à save.php -->
+    <input type="hidden" name="user_email" id="user-email">
+    <input type="hidden" name="user_nom" id="user-nom">
+    <input type="hidden" name="user_prenom" id="user-prenom">
+    <p class="form-desc">Attrapez le formulaire pour commencer.</p>
+
+        <!-- (Le lancement du modal se fait désormais via le bouton Envoyer) -->
+    <div class="actions">
+        <button type="button" id="stop-btn" class="stop-btn">✋ Arrêter le formulaire</button>
+    </div>
+
+    <div id="crank-section" style="display: none; margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px;">
+        <div class="energy-container">
+            <label>⚡ Batterie du Serveur :</label>
+            <div class="battery-shell">
+                <div id="battery-level" class="battery-level"></div>
+            </div>
+            <p id="status-text" style="font-size: 12px; margin-top: 5px;">Système en ligne</p>
+        </div>
+        <button type="button" id="crank-btn" class="crank-btn">GÉNÉRER DE L'ÉNERGIE</button>
+    </div>
+
+    <div class="field message-block" style="margin-top: 15px;">
+        <label for="message">Votre message :</label>
+        <textarea name="message" id="message" placeholder="Attrapez le formulaire d'abord..." rows="4" disabled></textarea>
+    </div>
+
+    <button type="submit" id="submit-btn" disabled>Envoyer</button>
+</form>
+    <!-- Modal "popup chiant" intégré -->
+    <div id="annoy-modal" class="annoy-modal" aria-hidden="true">
+        <div class="annoy-content" role="dialog" aria-modal="true">
+            <span class="annoy-close" onclick="return false;">✕</span>
+            <h2>⚠️ ATTENTION ⚠️</h2>
+            <p>C'EST TRÈS IMPORTANT !!!</p>
+            <p>Vous DEVEZ continuer pour envoyer votre formulaire !</p>
+            <div style="margin-top:10px">
+                <button id="annoy-continue" class="annoy-btn">CONTINUER</button>
+                <button id="annoy-cancel" class="annoy-btn">ANNULER</button>
+            </div>
+        </div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>
